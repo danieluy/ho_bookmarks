@@ -1,0 +1,14 @@
+{
+  "manifest_version": 2,
+  "name": "Marcadores H&O",
+  "description": "Extensión para sincronizar los marcadores del Servicio Técnico de Home & Office",
+  "version": "0.1.0",
+  "browser_action": {
+    "default_icon": "icon.png",
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "activeTab",
+    "bookmarks"
+  ]
+}
