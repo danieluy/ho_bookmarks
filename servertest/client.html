@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Client</title>
+  </head>
+  <body>
+    <script>
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function(){
+      if(xhttp.readyState === 4 && xhttp.status === 200){
+        doSomething(JSON.parse(xhttp.responseText));
+      }
+    };
+    xhttp.open('GET', 'http://localhost:8080/read', true);
+    xhttp.send();
+    function doSomething(json_data){
+      console.log(json_data);
+    }
+    </script>
+  </body>
+</html>
