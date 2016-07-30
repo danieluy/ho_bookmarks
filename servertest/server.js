@@ -1,61 +1,94 @@
+'use strict'
+
 const fs = require('fs')
 const express = require('express');
 const app = express();
 const bodyParser = require("body-parser");
 
-var bookmarks_data = require('./data/bookmarks.json');
+// var bookmarks_data = require('./data/bookmarks.json');
 
 app.use(bodyParser.json());
 
-// app.GET  ////////////////////////////////////////////////////////////////////
-
-// app.get('/', function(req, res){
-//    res.send('Nothing to see here');
-// });
-
-// Access-Control-Allow-Origin: *  /////////////////////////////////////////////
 app.use(function(req, res, next) {
-   res.header("Access-Control-Allow-Origin", "*");
-   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-   next();
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
 });
-
-// app.GET/API /////////////////////////////////////////////////////////////////
 
 app.get('/read', function(req, res){
-   res.json(bookmarks_data);
+  fs.readdir('./data/', (err, files) => {
+    if(err) console.log(err);
+    else{
+      const dates = files.map((file) => parseInt(file.slice(0,-5)));
+      fs.readFile(('./data/' + max(dates) + '.json'), (err, data) => {
+        if(err) console.log(err);
+        else{
+          console.log(data.toString());
+          res.json(JSON.parse(data.toString()));
+        }
+      });
+    }
+  });
 });
 
-// app.get('/API/hello/:name', function(req, res){
-//    res.send(
-//       '<style>*{font-family: monospace}</style>' +
-//       '<h1>Bienvenid@</h1>' +
-//       '<h2>' + req.params.name + '</h2>');
-// });
-//
-// app.get('/API/hello/:name/:lastname', function(req, res){
-//    res.send(
-//       '<style>*{font-family: monospace}</style>' +
-//       '<h1>Bienvenid@</h1>' +
-//       '<h2>' + req.params.name + ' ' + req.params.lastname + '</h2>');
-// });
-
 app.post('/write', function(req, res){
-  console.log(req.body);
+  let bookmarks_tree = createBookmarksTree(req.body);
+  let file_name = new Date().getTime();
+  fs.writeFileSync(('./data/' + file_name + '.json'), JSON.stringify(bookmarks_tree, null, 4));
 });
 
 // 404 -------------------------------------------------------------------------
 app.get('*', function(req, res){
-   res.send('This is a 404 error code');
+  res.send('This is a 404 error code');
 });
 
+const createBookmarksTree = (raw_bookmarks) => {
+  const root_folder = [];
+
+  const folders = raw_bookmarks
+  .filter(bookmark => bookmark.dateGroupModified)
+  .map((folder) => {
+    folder.children = [];
+    return folder;
+  })
+
+  const bookmarks = raw_bookmarks
+  .filter(bookmark => !bookmark.dateGroupModified)
+  .forEach((bookmark) => {
+    //change for a while loop
+    let is_children = false;
+    folders.forEach((folder) => {
+      if(folder.id === bookmark.parentId){
+        folder.children.push(bookmark);
+        is_children = true;
+      }
+    });
+    if(!is_children)
+      root_folder.push(bookmark);
+  });
+
+  folders.forEach((folder) => {
+    root_folder.push(folder);
+  });
+
+  return root_folder;
+}
+
+const max = (values) => {
+  let max = values[0];
+  for (var i = 1; i < values.length; i++) {
+    if(values[i] > max) max = values[i];
+  }
+  return max;
+}
+
 app.listen(8080, function(){
-   console.log(
-      '/////////////////////////////////////////////\n' +
-      '//                                         //\n' +
-      '//   Server listening on: localhost:8080   //\n' +
-      '//       Press Ctrl-C to terminate         //\n' +
-      '//                                         //\n' +
-      '/////////////////////////////////////////////'
-   );
+  console.log(
+    '/////////////////////////////////////////////\n' +
+    '//                                         //\n' +
+    '//   Server listening on: localhost:8080   //\n' +
+    '//       Press Ctrl-C to terminate         //\n' +
+    '//                                         //\n' +
+    '/////////////////////////////////////////////'
+  );
 });

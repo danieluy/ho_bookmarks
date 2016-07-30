@@ -1,0 +1,36 @@
+[
+    {
+        "dateAdded": 1469838147499,
+        "id": "310",
+        "index": 0,
+        "parentId": "309",
+        "title": "Home & Office",
+        "url": "http://www.ho.com.uy/"
+    },
+    {
+        "dateAdded": 1469838147500,
+        "id": "311",
+        "index": 2,
+        "parentId": "309",
+        "title": "Google",
+        "url": "https://www.google.com.uy/"
+    },
+    {
+        "dateAdded": 1469839767073,
+        "dateGroupModified": 1469839782601,
+        "id": "312",
+        "index": 1,
+        "parentId": "309",
+        "title": "New folder",
+        "children": [
+            {
+                "dateAdded": 1469839782601,
+                "id": "313",
+                "index": 0,
+                "parentId": "312",
+                "title": "New Tab",
+                "url": "chrome://newtab/"
+            }
+        ]
+    }
+]
