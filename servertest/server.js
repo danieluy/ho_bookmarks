@@ -23,7 +23,6 @@ app.get('/read', function(req, res){
       fs.readFile(('./data/' + max(dates) + '.json'), (err, data) => {
         if(err) console.log(err);
         else{
-          console.log(data.toString());
           res.json(JSON.parse(data.toString()));
         }
       });

@@ -1,14 +1,14 @@
+var display = document.getElementById('display');
+var g_ho_folder = null;
+var g_local_bookmarks = [];
+
 document.addEventListener('DOMContentLoaded', function(){
 
   document.getElementById('btn_test').addEventListener('click', test);
-  document.getElementById('btn_upload').addEventListener('click', postBookmarks);
-  document.getElementById('btn_download').addEventListener('click', getBookmarks(createBookmarks));
-  var display = document.getElementById('display');
-  var g_ho_folder = null;
-  var g_current_tab = null;
-  var g_local_bookmarks = [];
+  document.getElementById('btn_upload').addEventListener('click', uploadBookmarks);
+  document.getElementById('btn_download').addEventListener('click', downloadBookmarks);
 
-  function init() {
+  (function init() {
     chrome.bookmarks.search({'title': 'H&O'}, function (results){
       results = results.filter(function(result){
         return (result.parentId === '1' && result.title === 'H&O');
@@ -28,48 +28,45 @@ document.addEventListener('DOMContentLoaded', function(){
         displayMessage('Existe más de una carpeta "H&O" en la barra de marcadores', 10000);
       }
     });
+  }());
+
+  function downloadBookmarks(){
+    g_local_bookmarks = [];
+    getBookmarks(function(server_bookmarks){
+      createBookmarks(server_bookmarks, null);
+    });
   }
 
   function getBookmarks(callback){
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function(){
       if(xhttp.readyState === 4 && xhttp.status === 200){
-        callback(JSON.parse(xhttp.responseText), null);
+        callback(JSON.parse(xhttp.responseText));
       }
     };
     xhttp.open('GET', 'http://localhost:8080/read', true);
     xhttp.send();
   }
-  //hacer que cree la carpeta cuando la recive!!!!!!!!!!!!!!!!!!!!!!
-  //ver por qué no existe g_ho_folder
+
   function createBookmarks(bookmarks, folder){
     var parent_id = folder ? folder.id : g_ho_folder.id;
     bookmarks.forEach(function(bookmark){
-      if(bookmark.dateGroupModified)
-        newBookmark(parent_id, bookmark.title, bookmark.url);
+      if(bookmark.dateGroupModified){
+        chrome.bookmarks.create({'parentId': parent_id, 'title': bookmark.title}, function(new_folder) {
+          createBookmarks(bookmark.children, new_folder)
+        });
+      }
       else {
-        createBookmarks(bookmark.children, bookmark);
+        chrome.bookmarks.create({parentId: parent_id, title: bookmark.title, url: bookmark.url});
       }
     });
   }
 
-  function postBookmarks(){
+  function uploadBookmarks(){
     var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance
     xmlhttp.open("POST", "http://localhost:8080/write");
     xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xmlhttp.send(JSON.stringify(g_local_bookmarks));
-  }
-
-  function newBookmark(parentId, title, url){
-    chrome.bookmarks.create(
-      {
-        parentId: parentId || g_ho_folder.id,
-        title: title,
-        url: url
-      }, function(result){
-        g_local_bookmarks.push(result);
-      }
-    )
   }
 
   function getLocalBookmarks(){
@@ -77,24 +74,21 @@ document.addEventListener('DOMContentLoaded', function(){
 
       g_local_bookmarks = bookmarks;
 
-      var folders = bookmarks
-      .filter(function(bookmark){
+      bookmarks.filter(function(bookmark){
         return bookmark.dateGroupModified
-      });
-
-      for (var i = 0; i < folders.length; i++) {
-        chrome.bookmarks.getChildren(folders[i].id, function(child_bookmarks){
-          for (var j = 0; j < child_bookmarks.length; j++) {
-            g_local_bookmarks.push(child_bookmarks[j]);
-          }
+      })
+      .forEach(function(folder) {
+        chrome.bookmarks.getChildren(folder.id, function(child_bookmarks){
+          child_bookmarks.forEach(function(child_bookmark) {
+            g_local_bookmarks.push(child_bookmark);
+          });
         });
-      }
-
+      });
     });
   }
 
   function test(){
-    postBookmarks();
+    uploadBookmarks();
     console.log('Test method was called');
   }
 
@@ -106,7 +100,5 @@ document.addEventListener('DOMContentLoaded', function(){
       }, timeout);
     }
   }
-
-  init();
 
 });
