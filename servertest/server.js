@@ -16,6 +16,7 @@ app.use(function(req, res, next) {
 });
 
 app.get('/read', function(req, res){
+  console.log('/read');
   fs.readdir('./data/', (err, files) => {
     if(err) console.log(err);
     else{

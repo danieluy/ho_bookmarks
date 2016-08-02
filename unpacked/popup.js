@@ -1,14 +1,18 @@
-var display = document.getElementById('display');
 var g_ho_folder = null;
 var g_local_bookmarks = [];
+var g_server = 'localhost:8080';
 
 document.addEventListener('DOMContentLoaded', function(){
 
+  var display = document.getElementById('display');
   document.getElementById('btn_test').addEventListener('click', test);
   document.getElementById('btn_upload').addEventListener('click', uploadBookmarks);
   document.getElementById('btn_download').addEventListener('click', downloadBookmarks);
+  document.getElementById('btn_connect').addEventListener('click', setServerUrl);
+
 
   (function init() {
+    console.log(g_server);
     chrome.bookmarks.search({'title': 'H&O'}, function (results){
       results = results.filter(function(result){
         return (result.parentId === '1' && result.title === 'H&O');
@@ -28,7 +32,13 @@ document.addEventListener('DOMContentLoaded', function(){
         displayMessage('Existe más de una carpeta "H&O" en la barra de marcadores', 10000);
       }
     });
+    setServerUrl();
   }());
+
+  function setServerUrl(){
+    var server = document.getElementById('server_url').value;
+    if(server != '') g_server = server;
+  }
 
   function downloadBookmarks(){
     g_local_bookmarks = [];
@@ -44,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function(){
         callback(JSON.parse(xhttp.responseText));
       }
     };
-    xhttp.open('GET', 'http://localhost:8080/read', true);
+    xhttp.open('GET', 'http://' + g_server + '/read', true);
     xhttp.send();
   }
 
@@ -64,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
   function uploadBookmarks(){
     var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance
-    xmlhttp.open("POST", "http://localhost:8080/write");
+    xmlhttp.open("POST", 'http://' + g_server + "/write");
     xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xmlhttp.send(JSON.stringify(g_local_bookmarks));
   }
