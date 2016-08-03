@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function(){
   document.getElementById('btn_test').addEventListener('click', test);
   document.getElementById('btn_upload').addEventListener('click', uploadBookmarks);
   document.getElementById('btn_download').addEventListener('click', downloadBookmarks);
-  document.getElementById('btn_connect').addEventListener('click', setServerUrl);
+  // document.getElementById('btn_connect').addEventListener('click', setServerUrl);
 
 
   (function init() {
@@ -32,16 +32,11 @@ document.addEventListener('DOMContentLoaded', function(){
         displayMessage('Existe más de una carpeta "H&O" en la barra de marcadores', 10000);
       }
     });
-    setServerUrl();
   }());
-
-  function setServerUrl(){
-    var server = document.getElementById('server_url').value;
-    if(server != '') g_server = server;
-  }
 
   function downloadBookmarks(){
     g_local_bookmarks = [];
+    setServerUrl();
     getBookmarks(function(server_bookmarks){
       createBookmarks(server_bookmarks, null);
     });
@@ -58,6 +53,14 @@ document.addEventListener('DOMContentLoaded', function(){
     xhttp.send();
   }
 
+  function uploadBookmarks(){
+    setServerUrl();
+    var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance
+    xmlhttp.open("POST", 'http://' + g_server + "/write");
+    xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xmlhttp.send(JSON.stringify(g_local_bookmarks));
+  }
+
   function createBookmarks(bookmarks, folder){
     var parent_id = folder ? folder.id : g_ho_folder.id;
     bookmarks.forEach(function(bookmark){
@@ -70,13 +73,6 @@ document.addEventListener('DOMContentLoaded', function(){
         chrome.bookmarks.create({parentId: parent_id, title: bookmark.title, url: bookmark.url});
       }
     });
-  }
-
-  function uploadBookmarks(){
-    var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance
-    xmlhttp.open("POST", 'http://' + g_server + "/write");
-    xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xmlhttp.send(JSON.stringify(g_local_bookmarks));
   }
 
   function getLocalBookmarks(){
@@ -95,6 +91,12 @@ document.addEventListener('DOMContentLoaded', function(){
         });
       });
     });
+  }
+
+  function setServerUrl(){
+    var server = document.getElementById('server_url').value;
+    if(server != '') g_server = server;
+    console.log(g_server);
   }
 
   function test(){
