@@ -1,39 +1,38 @@
-var g_ho_folder = null;
-var g_local_bookmarks = [];
-var g_server = 'localhost:8080';
-
+/////  Event listeners  /////
 document.addEventListener('DOMContentLoaded', function(){
+  document.getElementById('btn_test').addEventListener('click', bmark.test);
+  document.getElementById('btn_upload').addEventListener('click', bmark.uploadBookmarks);
+  document.getElementById('btn_download').addEventListener('click', bmark.downloadBookmarks);
+});
 
+
+var bmark = (function(){
+
+  /////  Init  /////
+  var g_ho_folder = null;
+  var g_local_bookmarks = [];
+  var g_server = 'localhost:8080';
   var display = document.getElementById('display');
-  document.getElementById('btn_test').addEventListener('click', test);
-  document.getElementById('btn_upload').addEventListener('click', uploadBookmarks);
-  document.getElementById('btn_download').addEventListener('click', downloadBookmarks);
-  // document.getElementById('btn_connect').addEventListener('click', setServerUrl);
-
-
-  (function init() {
-    console.log(g_server);
-    chrome.bookmarks.search({'title': 'H&O'}, function (results){
-      results = results.filter(function(result){
-        return (result.parentId === '1' && result.title === 'H&O');
-      });
-      if(results.length === 0){
-        chrome.bookmarks.create({'parentId': '1', 'title': 'H&O'}, function(new_folder) {
-          g_ho_folder = new_folder;
-          // getBookmarks(createBookmarks);
-          // getLocalBookmarks();
-        });
-      }
-      else if(results.length === 1){
-        g_ho_folder = results[0];
-        getLocalBookmarks();
-      }
-      else{
-        displayMessage('Existe más de una carpeta "H&O" en la barra de marcadores', 10000);
-      }
+  //Check if H&O folder exists in the bookmarks bar
+  chrome.bookmarks.search({'title': 'H&O'}, function (results){
+    results = results.filter(function(result){
+      return (result.parentId === '1' && result.title === 'H&O');
     });
-  }());
+    if(results.length === 0){//If it doesn't => create it and set it as the app's bookmark folder
+      chrome.bookmarks.create({'parentId': '1', 'title': 'H&O'}, function(new_folder) {
+        g_ho_folder = new_folder;
+      });
+    }
+    else if(results.length === 1){//If it does => set it as the app's bookmark folder and fetch the local bookmarks
+      g_ho_folder = results[0];
+      getLocalBookmarks();
+    }
+    else{//If there is more than one => let the user know this
+      displayMessage('Existe más de una carpeta "H&O" en la barra de marcadores', 10000);
+    }
+  });
 
+  /////  Private Methods  /////
   function downloadBookmarks(){
     g_local_bookmarks = [];
     setServerUrl();
@@ -77,9 +76,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
   function getLocalBookmarks(){
     chrome.bookmarks.getChildren(g_ho_folder.id, function(bookmarks){
-
       g_local_bookmarks = bookmarks;
-
       bookmarks.filter(function(bookmark){
         return bookmark.dateGroupModified
       })
@@ -99,11 +96,6 @@ document.addEventListener('DOMContentLoaded', function(){
     console.log(g_server);
   }
 
-  function test(){
-    uploadBookmarks();
-    console.log('Test method was called');
-  }
-
   function displayMessage(message, timeout){
     display.innerHTML = message;
     if(timeout){
@@ -113,4 +105,10 @@ document.addEventListener('DOMContentLoaded', function(){
     }
   }
 
-});
+  /////  Public Methods  /////
+  return {
+    test: test,
+    uploadBookmarks: uploadBookmarks,
+    downloadBookmarks: downloadBookmarks
+  }
+}())
