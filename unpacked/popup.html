@@ -1,83 +1,25 @@
 <!doctype html>
 <!--
- This page is shown when the extension button is clicked, because the
- "browser_action" field in manifest.json contains the "default_popup" key with
- value "popup.html".
- -->
+This page is shown when the extension button is clicked, because the
+"browser_action" field in manifest.json contains the "default_popup" key with
+value "popup.html".
+-->
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Getting Started Extension's Popup</title>
-    <style>
-    *, html{
-      margin: 0px;
-      padding: 0px;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: Tahoma, sans-serif;
-      font-size: 12px;
-    }
-    .wrapper{
-      width: 160px;
-      padding: 10px;
-      overflow: auto;
-      border-radius: 3px;
-    }
-    .server-form{
-      overflow: auto;
-    }
-    input[type="text"]{
-      width: 100%;
-      padding: 10px 0px;
-      border-style: none;
-      text-align: center;
-      background-color: transparent;
-      transition: all 300ms ease-in-out;
-    }
-    input[type="text"]:hover{
-      background-color: #EEEEEE;
-    }
-    .button{
-      padding: 10px 0px;
-      float: left;
-      border-style: none;
-      background-color: transparent;
-      transition: all 300ms ease-in-out;
-      cursor: pointer;
-      font-size: 1em;
-      text-transform: uppercase;
-      font-weight: bold;
-      color: #333333
-    }
-    .button:hover{
-      background-color: #EEEEEE;
-    }
-    .button-50{
-      width: 50%;
-    }
-    .button-100{
-      width: 100%;
-    }
-    </style>
-    <!--
-      - JavaScript and HTML must be in separate files: see our Content Security
-      - Policy documentation[1] for details and explanation.
-      -
-      - [1]: https://developer.chrome.com/extensions/contentSecurityPolicy
-     -->
-    <script src="popup.js"></script>
-  </head>
-  <body>
-    <div class="wrapper">
-      <div class="server_form">
-        <input id="server_url" type="text" value="" placeholder="Servidor">
-        <!-- <button id="btn_connect" class="button button-100" type="button">Conectar</button> -->
-      </div>
-      <button id="btn_upload" class="button button-50" type="button">Subir</button>
-      <button id="btn_download" class="button button-50" type="button">Bajar</button>
-      <span id="display"></span>
-      <button type="button" id="btn_test" hidden>Test</button>
+<head>
+  <meta charset="UTF-8">
+  <title>Getting Started Extension's Popup</title>
+  <link href="popup.css" rel="stylesheet" type="text/css">
+  <script src="popup.js"></script>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="server_form">
+      <input id="server_url" type="text" value="" placeholder="Servidor">
+      <!-- <button id="btn_connect" class="button button-100" type="button">Conectar</button> -->
     </div>
-  </body>
+    <button id="btn_upload" class="button button-50" type="button">Subir</button>
+    <button id="btn_download" class="button button-50" type="button">Bajar</button>
+    <div id="display"></div>
+  </div>
+</body>
 </html>
