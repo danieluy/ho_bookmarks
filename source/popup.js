@@ -1,8 +1,11 @@
 /////  DOM Elements & Event listeners  /////
 document.addEventListener('DOMContentLoaded', function(){
-  // document.getElementById('btn_test').addEventListener('click', bmark.test);
   document.getElementById('btn_upload').addEventListener('click', bmark.uploadBookmarks);
   document.getElementById('btn_download').addEventListener('click', bmark.downloadBookmarks);
+  document.getElementById('server_url').addEventListener('keyup', function(e){
+    if(e.keyCode === 13)
+      bmark.updateServerUrl();
+  });
 });
 
 
@@ -111,26 +114,29 @@ var bmark = (function(){
   }
 
   function setServerUrl(){
-    storage.loadServerAddr(function(data){
-      if(data.server){
-        g_server = data.server;
+    storage.loadServerAddr(function(server){
+      if(server && server !== ''){
+        g_server = server;
         document.getElementById('server_url').value = g_server;
       }
-      else{
-        var server = document.getElementById('server_url').value;
-        if(server != ''){
-          g_server = server;
-          storage.saveServerAddr(g_server);
-        }
-      }
+      else updateServerUrl()
     });
+  }
+
+  function updateServerUrl(){
+    var server = document.getElementById('server_url').value;
+    if(server !== ''){
+      g_server = server;
+      storage.saveServerAddr(g_server);
+    }
   }
 
   /////  Public Methods  /////
   return {
     init: init,
     uploadBookmarks: uploadBookmarks,
-    downloadBookmarks: downloadBookmarks
+    downloadBookmarks: downloadBookmarks,
+    updateServerUrl: updateServerUrl
   }
 }())
 
